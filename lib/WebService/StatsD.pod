@@ -1,0 +1,28 @@
+=encoding UTF-8
+
+=head1 NAME
+
+WebService::StatsD
+
+=for html
+<a href="https://travis-ci.org/JRaspass/WebService-StatsD">
+    <img src="https://api.travis-ci.org/JRaspass/WebService-StatsD.svg">
+</a>
+
+=head1 SYNOPSIS
+
+ use WebService::StatsD qw/count dec inc/;
+
+ WebService::StatsD::set_socket( localhost => 8125 );
+
+ inc 'foo.bar';
+
+ dec 'foo.baz', .1;
+
+ count 'foo.qux', 123;
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright © James Raspass
+
+This is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
