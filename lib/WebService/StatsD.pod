@@ -17,7 +17,7 @@ WebService::StatsD
 
  inc 'foo.bar';
 
- dec 'foo.baz', .1;
+ dec 'foo.baz', 10;
 
  count 'foo.qux', 123;
 

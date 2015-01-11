@@ -4,8 +4,11 @@ use strict;
 use warnings;
 
 use Carp ();
+use XSLoader;
 
-my ( $host, $port, $sock ) = ( localhost => 8125 );
+XSLoader::load();
+
+our ( $host, $port, $sock ) = ( localhost => 8125 );
 
 sub set_host   {
     $host = $_[0];
@@ -33,12 +36,6 @@ sub import {
 
     *{ $caller . $_ } = $class->can($_) // Carp::croak qq/Unknown export "$_"/
         for @_;
-}
-
-sub dec {
-    unshift @_, ( shift // return ) . ':-1c';
-
-    goto &_send;
 }
 
 sub count {
