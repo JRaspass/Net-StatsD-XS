@@ -6,7 +6,7 @@
 #   define newXS_deffile(a, b) Perl_newXS(aTHX_ a, b, __FILE__)
 #endif
 
-static void dec(pTHX_ CV *cv __attribute__((unused))) {
+static void _send(pTHX_ CV *cv) {
     const unsigned int items
         = PL_stack_sp - (PL_stack_base + *PL_markstack_ptr--);
 
@@ -30,10 +30,33 @@ static void dec(pTHX_ CV *cv __attribute__((unused))) {
     STRLEN len;
     char *stat = SvPV(sp[1], len);
 
-    char *msg = (char *)alloca(len + 4);
+    const unsigned int ix = CvXSUBANY(cv).any_i32;
 
-    strcpy(msg, stat);
-    strcpy(msg + len, ":-1c");
+    char *msg;
+
+    if (ix == 0) {
+        msg = (char *)alloca(len + 4);
+
+        STRLEN i;
+        for (i = 0; i != len; i++)
+            msg[i] = stat[i];
+
+        msg[len++] = ':';
+        msg[len++] = '-';
+        msg[len++] = '1';
+        msg[len++] = 'c';
+    }
+    else {
+        msg = (char *)alloca(len + 3);
+
+        STRLEN i;
+        for (i = 0; i != len; i++)
+            msg[i] = stat[i];
+
+        msg[len++] = ':';
+        msg[len++] = '1';
+        msg[len++] = 'c';
+    }
 
     int sock;
 
@@ -49,9 +72,11 @@ static void dec(pTHX_ CV *cv __attribute__((unused))) {
     SV *port = get_sv("WebService::StatsD::port", 0);
     address.sin_port = htons(SvIV(port));
 
-    sendto(sock, msg, len + 4, 0, (struct sockaddr *)&address, sizeof(address));
+    sendto(sock, msg, len, 0, (struct sockaddr *)&address, sizeof(address));
 }
 
 void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
-    newXS_deffile("WebService::StatsD::dec", dec);
+    CvXSUBANY(newXS_deffile("WebService::StatsD::dec", _send)).any_i32 = 0;
+
+    CvXSUBANY(newXS_deffile("WebService::StatsD::inc", _send)).any_i32 = 1;
 }

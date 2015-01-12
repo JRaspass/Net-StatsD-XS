@@ -44,12 +44,6 @@ sub count {
     goto &_send;
 }
 
-sub inc {
-    unshift @_, ( shift // return ) . ':1c';
-
-    goto &_send;
-}
-
 sub _send {
     my ( $stat, $rate ) = @_;
 
