@@ -62,8 +62,11 @@ static void _send(pTHX_ CV *cv) {
 
     struct sockaddr_in address;
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+        warn("Failed to create socket\n");
+
         return;
+    }
 
     char *ip = "127.0.0.1";
 
@@ -72,7 +75,11 @@ static void _send(pTHX_ CV *cv) {
     SV *port = get_sv("WebService::StatsD::port", 0);
     address.sin_port = htons(SvIV(port));
 
-    sendto(sock, msg, len, 0, (struct sockaddr *)&address, sizeof(address));
+    ssize_t bytes_sent
+        = sendto(sock, msg, len, 0, (struct sockaddr *)&address, sizeof(address));
+
+    if (bytes_sent == -1)
+        warn("Failed to send UDP packet\n");
 }
 
 void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
