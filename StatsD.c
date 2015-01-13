@@ -60,13 +60,15 @@ static void _send(pTHX_ CV *cv) {
 
     int sock;
 
-    struct sockaddr_in address;
-
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         warn("Failed to create socket, error: %d\n", errno);
 
         return;
     }
+
+    struct sockaddr_in address;
+
+    address.sin_family = AF_INET;
 
     char *ip = "127.0.0.1";
 
