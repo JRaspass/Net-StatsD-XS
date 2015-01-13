@@ -63,7 +63,7 @@ static void _send(pTHX_ CV *cv) {
     struct sockaddr_in address;
 
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
-        warn("Failed to create socket\n");
+        warn("Failed to create socket, error: %d\n", errno);
 
         return;
     }
@@ -79,7 +79,7 @@ static void _send(pTHX_ CV *cv) {
         = sendto(sock, msg, len, 0, (struct sockaddr *)&address, sizeof(address));
 
     if (bytes_sent == -1)
-        warn("Failed to send UDP packet\n");
+        warn("Failed to send UDP packet, error: %d\n", errno);
 }
 
 void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
