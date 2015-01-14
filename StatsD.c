@@ -2,6 +2,18 @@
 #include <EXTERN.h>
 #include <perl.h>
 
+#ifndef NOT_REACHED
+#   if __has_builtin(__builtin_unreachable) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4)
+#       define NOT_REACHED __builtin_unreachable()
+#   elif defined(_MSC_VER)
+#       define NOT_REACHED __assume(0)
+#   elif defined(__ARMCC_VERSION)
+#       define NOT_REACHED __promise(0)
+#   else
+#       define NOT_REACHED assert(0)
+#   endif
+#endif
+
 #ifndef newXS_deffile
 #   define newXS_deffile(a, b) Perl_newXS(aTHX_ a, b, __FILE__)
 #endif
