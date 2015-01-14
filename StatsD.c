@@ -17,45 +17,94 @@ static void _send(pTHX_ CV *cv) {
     // return nothing. Therefore $_[0] == sp[1].
     SV **sp = PL_stack_sp -= items;
 
-    if (items > 1) {
-        if (!PL_srand_called) {
-            seedDrand01((Rand_seed_t)seed());
-            PL_srand_called = TRUE;
-        }
+    SV *delta = &PL_sv_no;
+    const I32 ix = CvXSUBANY(cv).any_i32;
 
-        if (Drand01() > SvNVx(sp[2]))
-            return;
+    if (ix == 2) {
+        if (items == 1) {
+            delta = &PL_sv_yes;
+        }
+        else if ( items == 2 ) {
+            delta = sp[2];
+        }
+        else {
+            delta = sp[2];
+
+            if (!PL_srand_called) {
+                seedDrand01((Rand_seed_t)seed());
+                PL_srand_called = TRUE;
+            }
+
+            if (Drand01() > SvNVx(sp[3]))
+                return;
+        }
+    }
+    else {
+        if (items > 1) {
+            if (!PL_srand_called) {
+                seedDrand01((Rand_seed_t)seed());
+                PL_srand_called = TRUE;
+            }
+
+            if (Drand01() > SvNVx(sp[2]))
+                return;
+        }
     }
 
     STRLEN len;
     char *stat = SvPV(sp[1], len);
 
-    const unsigned int ix = CvXSUBANY(cv).any_i32;
-
     char *msg;
 
-    if (ix == 0) {
-        msg = (char *)alloca(len + 4);
+    switch (ix) {
+        case 0: {
+            msg = (char *)alloca(len + 4);
 
-        STRLEN i;
-        for (i = 0; i != len; i++)
-            msg[i] = stat[i];
+            STRLEN i;
+            for (i = 0; i != len; i++)
+                msg[i] = stat[i];
 
-        msg[len++] = ':';
-        msg[len++] = '-';
-        msg[len++] = '1';
-        msg[len++] = 'c';
-    }
-    else {
-        msg = (char *)alloca(len + 3);
+            msg[len++] = ':';
+            msg[len++] = '-';
+            msg[len++] = '1';
+            msg[len++] = 'c';
 
-        STRLEN i;
-        for (i = 0; i != len; i++)
-            msg[i] = stat[i];
+            break;
+        }
+        case 1: {
+            msg = (char *)alloca(len + 3);
 
-        msg[len++] = ':';
-        msg[len++] = '1';
-        msg[len++] = 'c';
+            STRLEN i;
+            for (i = 0; i != len; i++)
+                msg[i] = stat[i];
+
+            msg[len++] = ':';
+            msg[len++] = '1';
+            msg[len++] = 'c';
+
+            break;
+        }
+        case 2: {
+            msg = (char *)alloca(len + 5);
+
+            STRLEN i;
+            for (i = 0; i != len; i++)
+                msg[i] = stat[i];
+
+            msg[len++] = ':';
+
+            STRLEN delta_len;
+            char *delta_p = SvPV(delta, delta_len);
+
+            for(i = 0; i != delta_len; i++)
+                msg[len++] = delta_p[i];
+
+            msg[len++] = 'c';
+
+            break;
+        }
+        default:
+            NOT_REACHED;
     }
 
     int sock;
@@ -88,4 +137,6 @@ void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
     CvXSUBANY(newXS_deffile("WebService::StatsD::dec", _send)).any_i32 = 0;
 
     CvXSUBANY(newXS_deffile("WebService::StatsD::inc", _send)).any_i32 = 1;
+
+    CvXSUBANY(newXS_deffile("WebService::StatsD::count", _send)).any_i32 = 2;
 }

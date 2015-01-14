@@ -38,26 +38,4 @@ sub import {
         for @_;
 }
 
-sub count {
-    unshift @_, ( shift // return ) . ':' . ( shift // 1 ) . 'c';
-
-    goto &_send;
-}
-
-sub _send {
-    my ( $stat, $rate ) = @_;
-
-    return if defined $rate && rand > $rate;
-
-    unless ($sock) {
-        socket $sock, 2, 2, 0 or return;
-
-        my $host = gethostbyname $host or return;
-
-        connect $sock, pack 'Sna4x8', 2, $port, $host or return;
-    }
-
-    send $sock, $stat, 0;
-}
-
 1;
