@@ -2,6 +2,10 @@
 #include <EXTERN.h>
 #include <perl.h>
 
+#ifndef __has_builtin
+#   define __has_builtin(x) 0
+#endif
+
 #ifndef NOT_REACHED
 #   if __has_builtin(__builtin_unreachable) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4)
 #       define NOT_REACHED __builtin_unreachable()
