@@ -22,6 +22,10 @@
 #   define newXS_deffile(a, b) Perl_newXS(aTHX_ a, b, __FILE__)
 #endif
 
+/*int sock = -1;
+
+struct sockaddr_in address;
+
 static void _send(pTHX_ CV *cv) {
     const unsigned int items
         = PL_stack_sp - (PL_stack_base + *PL_markstack_ptr--);
@@ -123,36 +127,34 @@ static void _send(pTHX_ CV *cv) {
             NOT_REACHED;
     }
 
-    int sock;
+    if (sock == -1) {
+        if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+            warn("Failed to create socket, error: %d\n", errno);
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
-        warn("Failed to create socket, error: %d\n", errno);
+            return;
+        }
 
-        return;
+        address.sin_family = AF_INET;
+
+        char *ip = "127.0.0.1";
+
+        inet_aton(ip, &address.sin_addr);
+
+        SV *port = get_sv("WebService::StatsD::port", 0);
+        address.sin_port = htons(SvIV(port));
     }
-
-    struct sockaddr_in address;
-
-    address.sin_family = AF_INET;
-
-    char *ip = "127.0.0.1";
-
-    inet_aton(ip, &address.sin_addr);
-
-    SV *port = get_sv("WebService::StatsD::port", 0);
-    address.sin_port = htons(SvIV(port));
 
     ssize_t bytes_sent
         = sendto(sock, msg, len, 0, (struct sockaddr *)&address, sizeof(address));
 
     if (bytes_sent == -1)
         warn("Failed to send UDP packet, error: %d\n", errno);
-}
+}*/
 
 void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
-    CvXSUBANY(newXS_deffile("WebService::StatsD::dec", _send)).any_i32 = 0;
+    /*CvXSUBANY(newXS_deffile("WebService::StatsD::dec", _send)).any_i32 = 0;
 
     CvXSUBANY(newXS_deffile("WebService::StatsD::inc", _send)).any_i32 = 1;
 
-    CvXSUBANY(newXS_deffile("WebService::StatsD::count", _send)).any_i32 = 2;
+    CvXSUBANY(newXS_deffile("WebService::StatsD::count", _send)).any_i32 = 2;*/
 }
