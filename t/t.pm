@@ -23,7 +23,7 @@ sub import {
         package ${\scalar caller};
 
         use Test::More tests => $_[1];
-        use WebService::StatsD qw(count dec inc);
+        use WebService::StatsD qw(count dec inc timer);
     /;
 }
 

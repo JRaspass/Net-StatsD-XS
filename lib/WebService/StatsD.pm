@@ -28,14 +28,10 @@ sub set_socket {
     undef $sock;
 }
 
-sub import {
-    my $class  = shift;
-    my $caller = caller . '::';
+sub count {
+    unshift @_, ( shift // return ) . ':' . ( shift // 1 ) . 'c';
 
-    no strict 'refs';
-
-    *{ $caller . $_ } = $class->can($_) // Carp::croak qq/Unknown export "$_"/
-        for @_;
+    goto &_send;
 }
 
 sub dec {
@@ -44,16 +40,20 @@ sub dec {
     goto &_send;
 }
 
-sub count {
-    unshift @_, ( shift // return ) . ':' . ( shift // 1 ) . 'c';
-
-    goto &_send;
-}
-
 sub inc {
     unshift @_, ( shift // return ) . ':1c';
 
     goto &_send;
+}
+
+sub import {
+    my $class  = shift;
+    my $caller = caller . '::';
+
+    no strict 'refs';
+
+    *{ $caller . $_ } = $class->can($_) // Carp::croak qq/Unknown export "$_"/
+        for @_;
 }
 
 sub _send {
@@ -72,6 +72,18 @@ sub _send {
     send $sock, $stat, 0;
 
     return;
+}
+
+package WebService::StatsD::Timer;
+
+use Time::HiRes ();
+
+sub send {
+    $_ = int( Time::HiRes::time * 1_000 ) - ${ +shift };
+
+    unshift @_, ( shift // return ) . ":$_|ms";
+
+    goto &WebService::StatsD::_send;
 }
 
 1;

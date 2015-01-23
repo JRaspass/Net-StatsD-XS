@@ -151,10 +151,61 @@ static void _send(pTHX_ CV *cv) {
         warn("Failed to send UDP packet, error: %d\n", errno);
 }*/
 
+static HV *timer_stash;
+
+static OP *timer(pTHX) {
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+
+    SV *sv = newSViv( tv.tv_sec * 1000 + tv.tv_usec / 1000 );
+
+    sv_upgrade(sv, SVt_PVMG);
+
+    SvFLAGS(sv) = SVf_IOK | SVp_IOK | SVs_OBJECT | SVt_PVMG;
+
+    SvREFCNT(timer_stash)++;
+    SvSTASH_set(sv, timer_stash);
+
+    // Create a new IV, and make it the return value.
+    SV *rv = *( PL_stack_sp = PL_stack_base + *PL_markstack_ptr-- + 1 )
+           = newSV_type(SVt_IV);
+
+    SvROK_on(rv);
+    SvRV_set(rv, sv);
+
+    return NORMAL;
+}
+
+static void empty(pTHX_ CV *cv __attribute__((unused))) {}
+
+static OP *call_checker(pTHX_ OP *entersubop, GV *namegv __attribute__((unused)), SV *ckobj __attribute__((unused))) {
+    op_free(entersubop);
+
+    OP *op = newOP(OP_CUSTOM, 0);
+
+    op->op_ppaddr = timer;
+
+    return op;
+}
+
 void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
     /*CvXSUBANY(newXS_deffile("WebService::StatsD::dec", _send)).any_i32 = 0;
 
     CvXSUBANY(newXS_deffile("WebService::StatsD::inc", _send)).any_i32 = 1;
 
     CvXSUBANY(newXS_deffile("WebService::StatsD::count", _send)).any_i32 = 2;*/
+
+    static XOP op_timer;
+
+    XopENTRY_set(&op_timer, xop_name, "timer");
+
+    Perl_custom_op_register(aTHX_ timer, &op_timer);
+
+    cv = newXS_deffile("WebService::StatsD::timer", empty);
+
+    cv_set_call_checker(cv, call_checker, (SV*)cv);
+
+    timer_stash
+        = Perl_gv_stashpvn(aTHX_ STR_WITH_LEN("WebService::StatsD::Timer"), 0);
 }
