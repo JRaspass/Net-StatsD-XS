@@ -29,19 +29,19 @@ sub set_socket {
 }
 
 sub count {
-    unshift @_, ( shift // return ) . ':' . ( shift // 1 ) . 'c';
+    unshift @_, ( shift // return ) . ':' . ( shift // 1 ) . '|c';
 
     goto &_send;
 }
 
 sub dec {
-    unshift @_, ( shift // return ) . ':-1c';
+    unshift @_, ( shift // return ) . ':-1|c';
 
     goto &_send;
 }
 
 sub inc {
-    unshift @_, ( shift // return ) . ':1c';
+    unshift @_, ( shift // return ) . ':1|c';
 
     goto &_send;
 }
@@ -58,6 +58,12 @@ sub import {
 
 sub _send {
     my ( $stat, $rate ) = @_;
+
+    if ( defined $rate && $rate < 1 ) {
+        return if rand > $rate;
+
+        $stat .= '|@' . $rate;
+    }
 
     return if defined $rate && rand > $rate;
 
