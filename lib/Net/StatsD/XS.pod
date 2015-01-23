@@ -2,18 +2,18 @@
 
 =head1 NAME
 
-WebService::StatsD
+Net::StatsD::XS
 
 =for html
-<a href="https://travis-ci.org/JRaspass/WebService-StatsD">
-    <img src="https://api.travis-ci.org/JRaspass/WebService-StatsD.svg">
+<a href="https://travis-ci.org/JRaspass/Net-StatsD-XS">
+    <img src="https://api.travis-ci.org/JRaspass/Net-StatsD-XS.svg">
 </a>
 
 =head1 SYNOPSIS
 
- use WebService::StatsD qw/count dec inc/;
+ use Net::StatsD::XS qw/count dec inc/;
 
- WebService::StatsD::set_socket( localhost => 8125 );
+ Net::StatsD::XS::set_socket( localhost => 8125 );
 
  inc 'foo.bar';
 

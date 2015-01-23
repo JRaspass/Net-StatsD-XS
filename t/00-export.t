@@ -4,27 +4,27 @@ use warnings;
 use Test::Fatal;
 use Test::More;
 
-require WebService::StatsD;
+require Net::StatsD::XS;
 
-package default { WebService::StatsD->import }
+package default { Net::StatsD::XS->import }
 
-is_deeply [ sort keys %default:: ], [], 'use WebService::StatsD';
+is_deeply [ sort keys %default:: ], [], 'use Net::StatsD::XS';
 
-package dec { WebService::StatsD->import('dec') }
+package dec { Net::StatsD::XS->import('dec') }
 
-is_deeply [ sort keys %dec:: ], ['dec'], "use WebService::StatsD 'dec'";
+is_deeply [ sort keys %dec:: ], ['dec'], "use Net::StatsD::XS 'dec'";
 
-package inc { WebService::StatsD->import('inc') }
+package inc { Net::StatsD::XS->import('inc') }
 
-is_deeply [ sort keys %inc:: ], ['inc'], "use WebService::StatsD 'inc'";
+is_deeply [ sort keys %inc:: ], ['inc'], "use Net::StatsD::XS 'inc'";
 
-package dec_inc { WebService::StatsD->import(qw/dec inc/) }
+package dec_inc { Net::StatsD::XS->import(qw/dec inc/) }
 
 is_deeply [ sort keys %dec_inc:: ], [qw/dec inc/],
-    'use WebService::StatsD qw/dec inc/';
+    'use Net::StatsD::XS qw/dec inc/';
 
-is exception { WebService::StatsD->import('foo') },
+is exception { Net::StatsD::XS->import('foo') },
     'Unknown export "foo" at ' . __FILE__ . ' line ' . (__LINE__ - 1) . ".\n",
-    "use WebService::StatsD 'foo'";
+    "use Net::StatsD::XS 'foo'";
 
 done_testing;

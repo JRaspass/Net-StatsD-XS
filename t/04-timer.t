@@ -3,8 +3,8 @@ use t   '3';
 
 my $timer = timer;
 
-is ref $timer, 'WebService::StatsD::Timer',
-    'timer returns a WebService::StatsD::Timer';
+is ref $timer, 'Net::StatsD::XS::Timer',
+    'timer returns a Net::StatsD::XS::Timer';
 
 ok $timer->can('send'), 'timer can send';
 

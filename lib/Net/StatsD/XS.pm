@@ -1,4 +1,4 @@
-package WebService::StatsD 0.001;
+package Net::StatsD::XS 0.001;
 
 use strict;
 use warnings;
@@ -80,7 +80,7 @@ sub _send {
     return;
 }
 
-package WebService::StatsD::Timer;
+package Net::StatsD::XS::Timer;
 
 use Time::HiRes ();
 
@@ -89,7 +89,7 @@ sub send {
 
     unshift @_, ( shift // return ) . ":$_|ms";
 
-    goto &WebService::StatsD::_send;
+    goto &Net::StatsD::XS::_send;
 }
 
 1;

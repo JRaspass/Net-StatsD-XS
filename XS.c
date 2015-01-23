@@ -140,7 +140,7 @@ static void _send(pTHX_ CV *cv) {
 
         inet_aton(ip, &address.sin_addr);
 
-        SV *port = get_sv("WebService::StatsD::port", 0);
+        SV *port = get_sv("Net::StatsD::XS::port", 0);
         address.sin_port = htons(SvIV(port));
     }
 
@@ -189,12 +189,12 @@ static OP *call_checker(pTHX_ OP *entersubop, GV *namegv __attribute__((unused))
     return op;
 }
 
-void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
-    /*CvXSUBANY(newXS_deffile("WebService::StatsD::dec", _send)).any_i32 = 0;
+void boot_Net__StatsD__XS(pTHX_ CV *cv __attribute__((unused))) {
+    /*CvXSUBANY(newXS_deffile("Net::StatsD::XS::dec", _send)).any_i32 = 0;
 
-    CvXSUBANY(newXS_deffile("WebService::StatsD::inc", _send)).any_i32 = 1;
+    CvXSUBANY(newXS_deffile("Net::StatsD::XS::inc", _send)).any_i32 = 1;
 
-    CvXSUBANY(newXS_deffile("WebService::StatsD::count", _send)).any_i32 = 2;*/
+    CvXSUBANY(newXS_deffile("Net::StatsD::XS::count", _send)).any_i32 = 2;*/
 
     static XOP op_timer;
 
@@ -202,10 +202,10 @@ void boot_WebService__StatsD(pTHX_ CV *cv __attribute__((unused))) {
 
     Perl_custom_op_register(aTHX_ timer, &op_timer);
 
-    cv = newXS_deffile("WebService::StatsD::timer", empty);
+    cv = newXS_deffile("Net::StatsD::XS::timer", empty);
 
     cv_set_call_checker(cv, call_checker, (SV*)cv);
 
     timer_stash
-        = Perl_gv_stashpvn(aTHX_ STR_WITH_LEN("WebService::StatsD::Timer"), 0);
+        = Perl_gv_stashpvn(aTHX_ STR_WITH_LEN("Net::StatsD::XS::Timer"), 0);
 }

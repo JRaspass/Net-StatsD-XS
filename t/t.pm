@@ -11,9 +11,9 @@ fcntl $sock, 4, 2048;
 # TODO use literal hex value here.
 bind $sock, pack 'SxxNx8', 2, 2_130_706_433;
 
-require WebService::StatsD;
+require Net::StatsD::XS;
 
-WebService::StatsD::set_port( unpack 'xxn', getsockname $sock );
+Net::StatsD::XS::set_port( unpack 'xxn', getsockname $sock );
 
 sub import {
     strict->import;
@@ -23,7 +23,8 @@ sub import {
         package ${\scalar caller};
 
         use Test::More tests => $_[1];
-        use WebService::StatsD qw(count dec inc timer);
+
+        Net::StatsD::XS->import( qw(count dec inc timer) );
     /;
 }
 

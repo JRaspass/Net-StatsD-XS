@@ -1,1 +1,1 @@
-lib/WebService/StatsD.pod
+lib/Net/StatsD/XS.pod
