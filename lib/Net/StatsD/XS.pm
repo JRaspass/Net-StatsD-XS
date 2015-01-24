@@ -65,8 +65,6 @@ sub _send {
         $stat .= '|@' . $rate;
     }
 
-    return if defined $rate && rand > $rate;
-
     unless ($sock) {
         socket $sock, 2, 2, 0 or return;
 
