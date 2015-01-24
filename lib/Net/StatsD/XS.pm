@@ -29,21 +29,15 @@ sub set_socket {
 }
 
 sub count {
-    unshift @_, ( shift // return ) . ':' . ( shift // 1 ) . '|c';
-
-    goto &_send;
+    _send( ( shift // return ) . ':' . ( shift // 1 )  . '|c', @_ );
 }
 
 sub dec {
-    unshift @_, ( shift // return ) . ':-1|c';
-
-    goto &_send;
+    _send( ( shift // return ) . ':-1|c', @_ );
 }
 
 sub inc {
-    unshift @_, ( shift // return ) . ':1|c';
-
-    goto &_send;
+    _send( ( shift // return ) . ':1|c', @_ );
 }
 
 sub import {
