@@ -189,6 +189,16 @@ static OP *call_checker(pTHX_ OP *entersubop, GV *namegv __attribute__((unused))
     return op;
 }
 
+// Used by Net::StatsD::XS::Timer::send.
+static void _time(pTHX_ CV *cv __attribute__((unused))) {
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+
+    *( PL_stack_sp = PL_stack_base + *PL_markstack_ptr-- + 1 )
+        = newSViv( tv.tv_sec * 1000 + tv.tv_usec / 1000 );
+}
+
 void boot_Net__StatsD__XS(pTHX_ CV *cv __attribute__((unused))) {
     /*CvXSUBANY(newXS_deffile("Net::StatsD::XS::dec", _send)).any_i32 = 0;
 
@@ -201,6 +211,8 @@ void boot_Net__StatsD__XS(pTHX_ CV *cv __attribute__((unused))) {
     XopENTRY_set(&op_timer, xop_name, "timer");
 
     Perl_custom_op_register(aTHX_ timer, &op_timer);
+
+    newXS_deffile("Net::StatsD::XS::Timer::_time", _time);
 
     cv = newXS_deffile("Net::StatsD::XS::timer", empty);
 

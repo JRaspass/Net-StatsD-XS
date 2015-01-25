@@ -74,14 +74,9 @@ sub _send {
 
 package Net::StatsD::XS::Timer;
 
-use Time::HiRes ();
-
 sub send {
-    $_ = int( Time::HiRes::time * 1_000 ) - ${ +shift };
-
-    unshift @_, ( shift // return ) . ":$_|ms";
-
-    goto &Net::StatsD::XS::_send;
+    Net::StatsD::XS::_send(
+        ( $_[1] // return ) . ':' . ( _time() - ${ $_[0] } ) . '|ms', $_[2] );
 }
 
 1;
