@@ -1,6 +1,6 @@
 =head1 NAME
 
-Net::StatsD::XS
+Net::StatsD::XS - Sends statistics to StatsD
 
 =for html
 <a href="https://travis-ci.org/JRaspass/Net-StatsD-XS">
