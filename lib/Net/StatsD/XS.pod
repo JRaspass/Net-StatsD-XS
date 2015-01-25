@@ -1,5 +1,3 @@
-=encoding UTF-8
-
 =head1 NAME
 
 Net::StatsD::XS
@@ -11,18 +9,113 @@ Net::StatsD::XS
 
 =head1 SYNOPSIS
 
- use Net::StatsD::XS qw/count dec inc/;
+ use Net::StatsD::XS qw/count dec inc timer/;
 
  Net::StatsD::XS::set_socket( localhost => 8125 );
 
+ # Increment foo.bar by 1.
  inc 'foo.bar';
 
- dec 'foo.baz', 10;
+ # Decrement foo.baz by 1, sampled at 10%.
+ dec 'foo.baz', 0.1;
 
+ # Increment foo.qux by 123.
  count 'foo.qux', 123;
 
-=head1 COPYRIGHT AND LICENSE
+ # Decrement foo.quux by 456.
+ count 'foo.quux', -456;
 
-Copyright © James Raspass
+ # Create a timer, do some work, then send the time taken as corge.
+ my $timer = timer;
 
-This is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+ ...
+
+ $timer->send('corge');
+
+=head1 SAMPLING
+
+These functions support an optional last paramater, the sample rate, if
+supplied only that proportion of calls will result in an UDP message being
+sent, i.e. a sample rate of C<0.75> will result in roughly C<75%> of calls
+sending a message, and C<25%> returning early.
+
+=head1 FUNCTIONS
+
+None of the functions in this module are exported by default, but all are
+availble for exportation if you so wish.
+
+=head2 set_{host,port,socket}
+
+Set the destination of the StatsD server, defaults to C<localhost:8125>.
+
+ Net::StatsD::XS::set_host('localhost');
+ Net::StatsD::XS::set_port(8125);
+
+ # or
+
+ Net::StatsD::XS::set_socket( localhost => 8125 );
+
+Host can be a hostname or an IPv4 address.
+
+These functions affect the global state of this module and as such it's not
+possible to have multiple StatsD endpoints in the same process. Also calling
+any of these functions clears the cached socket, therefore it's best to only
+call these once, at startup.
+
+=head2 inc
+
+ inc 'foo';
+ inc 'bar', 0.5;
+
+=head2 dec
+
+=head2 count
+
+=head2 timer
+
+Accepts no arguments, returns an instance of a L<Net::StatsD::XS::Timer>.
+
+=head1 BENCHMARK
+
+ $ perl -Mblib example/bench.pl
+ inc
+
+                     Rate     Net::Statsd Net::StatsD::XS
+ Net::Statsd     208523/s              --            -66%
+ Net::StatsD::XS 607350/s            191%              --
+
+ dec
+
+                     Rate     Net::Statsd Net::StatsD::XS
+ Net::Statsd     210436/s              --            -64%
+ Net::StatsD::XS 586216/s            179%              --
+
+ count/update_stats
+
+                     Rate     Net::Statsd Net::StatsD::XS
+ Net::Statsd     220554/s              --            -60%
+ Net::StatsD::XS 551385/s            150%              --
+
+=head1 TODO
+
+=over
+
+=item *
+
+Replace the perl versions of dec, inc, count, etc. with XS versions using
+custom operators so that they're actually faster.
+
+=back
+
+=head1 SEE ALSO
+
+L<Net::Statsd>
+
+L<Etsy::StatsD>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright James Raspass
+
+This is free software; you may redistribute it and/or modify it under the same
+terms as Perl itself.
